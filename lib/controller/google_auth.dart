@@ -67,3 +67,8 @@ Future signInWithGoogle(context) async {
     print("Sign is note successful !");
   }
 }
+
+Future<void> GoogleLogout() async {
+  await googleSignIn.disconnect();
+  await FirebaseAuth.instance.signOut();
+}

@@ -4,12 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:intl/intl.dart';
 import 'package:momoro_app/screen/tablecalendar_screen.dart';
 
 class LastTestScreen extends StatefulWidget {
   final String userName;
   final String userRef;
   final String dateString;
+  final selectedDay;
   final year;
   final month;
   final day;
@@ -19,6 +21,7 @@ class LastTestScreen extends StatefulWidget {
       required this.userName,
       required this.userRef,
       required this.dateString,
+      required this.selectedDay,
       required this.year,
       required this.month,
       required this.day});
@@ -30,63 +33,120 @@ class LastTestScreen extends StatefulWidget {
 class _LastTestScreenState extends State<LastTestScreen> {
   CollectionReference ref = FirebaseFirestore.instance.collection('admin');
 
+  FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   final TextEditingController titleController = TextEditingController();
   final TextEditingController desController = TextEditingController();
 
   Future<void> _update(DocumentSnapshot documentSnapshot, tempRef) async {
-    titleController.text = documentSnapshot['title'];
+    var tempTitle;
+
+    if(documentSnapshot['title'] == "타인") {
+      tempTitle = "타인 (배우자, 부모님, 친구 등)";
+    } else {
+      tempTitle = documentSnapshot['title'];
+    }
+
+
+    //titleController.text = documentSnapshot['title'];
     desController.text = documentSnapshot['description'];
 
     await showModalBottomSheet(
       isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: SizedBox(
-            child: Padding(
-              padding: EdgeInsets.only(
-                top: 20,
-                left: 20,
-                right: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    controller: desController,
-                    decoration: InputDecoration(
-                      //labelText: 'description',
-                      labelText: documentSnapshot['title'],
+        return GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: SingleChildScrollView(
+            child: SizedBox(
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height * 0.03,
+                  left: MediaQuery.of(context).size.width * 0.05,
+                  right: MediaQuery.of(context).size.width * 0.05,
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Scrollbar(
+                      child: TextField(
+                        controller: desController,
+                        focusNode: _focusNode,
+                        decoration: InputDecoration(
+                          //labelText: 'description',
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              width: 1,
+                              color: Colors.indigo,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              width: 1,
+                              color: Colors.indigo,
+                            ),
+                          ),
+                          //labelText: documentSnapshot['title'],
+                          labelText: tempTitle,
+                          labelStyle: TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'NotoSans',
+                            fontWeight: FontWeight.w500,
+                            color: _focusNode.hasFocus ? Colors.indigo : Colors.grey,
+                          ),
+                        ),
+                        maxLines: 5,
+                        keyboardType: TextInputType.multiline,
+                      ),
                     ),
-                    maxLines: null,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final String title = titleController.text;
-                        final String des = desController.text;
-
-                        await tempRef
-                            .doc(documentSnapshot.id)
-                            .update({"description": des});
-                        /*
-                        ref
-                            .doc(documentSnapshot.id)
-                            .update({"title": title, "description": des}); */
-
-                        titleController.text = "";
-                        desController.text = "";
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('저장'),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.03,
                     ),
-                  ),
-                ],
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final String title = titleController.text;
+                          final String des = desController.text;
+
+                          await tempRef
+                              .doc(documentSnapshot.id)
+                              .update({"description": des});
+
+                          titleController.text = "";
+                          desController.text = "";
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          '저장',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'NotoSans',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          backgroundColor: Colors.indigo,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.03,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -158,7 +218,9 @@ class _LastTestScreenState extends State<LastTestScreen> {
           title: Text(
             "Thank-you Note",
             style: TextStyle(
-              fontSize: 24.0,
+              fontSize: 20.0,
+              fontFamily: 'NotoSans',
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
@@ -166,8 +228,10 @@ class _LastTestScreenState extends State<LastTestScreen> {
           child: StreamBuilder(
             stream: ref
                 .doc(widget.userRef)
-                .collection(widget.year.toString()).doc(widget.month.toString()).collection(widget.day.toString())
-                .orderBy("title", descending: false) // 리스트뷰 정렬을 위한 코드
+                .collection(widget.year.toString())
+                .doc(widget.month.toString())
+                .collection(widget.day.toString())
+                .orderBy("idx", descending: false) // 리스트뷰 정렬을 위한 코드
                 .snapshots(),
             builder: (BuildContext context,
                 AsyncSnapshot<QuerySnapshot> streamSnapshot) {
@@ -186,13 +250,16 @@ class _LastTestScreenState extends State<LastTestScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          padding: EdgeInsets.only(top: 30),
+                          padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).size.height * 0.03,
+                          ),
                           height: MediaQuery.of(context).size.height * 0.1,
                           child: Text(
-                            widget.dateString,
+                            "${widget.dateString} ${DateFormat.EEEE('ko').format(widget.selectedDay)}",
                             style: TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                              fontFamily: 'NotoSans',
+                              fontWeight: FontWeight.w700,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -200,7 +267,7 @@ class _LastTestScreenState extends State<LastTestScreen> {
                       ],
                     ),
                     SizedBox(
-                      height: 20,
+                      height: MediaQuery.of(context).size.height * 0.03,
                     ),
                     Offstage(
                       offstage: !offstageIdx,
@@ -210,7 +277,10 @@ class _LastTestScreenState extends State<LastTestScreen> {
                         direction: Axis.horizontal,
                         allowHalfRating: true,
                         itemCount: 5,
-                        itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                        itemPadding: EdgeInsets.symmetric(
+                          horizontal:
+                              MediaQuery.of(context).size.height * 0.005,
+                        ),
                         itemBuilder: (context, _) => Icon(
                           Icons.star,
                           color: Colors.amber,
@@ -224,45 +294,81 @@ class _LastTestScreenState extends State<LastTestScreen> {
                       ),
                     ),
                     SizedBox(
-                      height: 15.0,
+                      height: MediaQuery.of(context).size.height * 0.03,
                     ),
                     Offstage(
                       offstage: offstageIdx,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          // 기존 데이터 없는 경우, 초기 감사노트 템플릿 생성 코드
-                          await tempRef.add({"title": "나 자신", "description": "", "rating": 0.0});
-                          await tempRef.add({"title": "배우자", "description": "", "rating": 0.0});
-                          await tempRef.add({"title": "아이", "description": "", "rating": 0.0});
-                        },
-                        child: Text(
-                          "템플릿 생성",
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      child: Container(
+                        margin: EdgeInsets.only(
+                          bottom: MediaQuery.of(context).size.height * 0.03,
                         ),
-                        style: ButtonStyle(
-                          padding: MaterialStateProperty.all<EdgeInsets>(
-                              EdgeInsets.all(10)),
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(Colors.indigo),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            // 기존 데이터 없는 경우, 초기 감사노트 템플릿 생성 코드
+                            await tempRef.add({
+                              "idx": 1,
+                              "title": "나 자신",
+                              "description": "",
+                              "rating": 0.0
+                            });
+                            await tempRef.add({
+                              "idx": 2,
+                              "title": "타인",
+                              "description": "",
+                              "rating": 0.0
+                            });
+                            await tempRef.add({
+                              "idx": 3,
+                              "title": "아이",
+                              "description": "",
+                              "rating": 0.0
+                            });
+                          },
+                          child: Text(
+                            "템플릿 생성",
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontFamily: 'NotoSans',
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          style: ButtonStyle(
+                            padding: MaterialStateProperty.all<EdgeInsets>(
+                              EdgeInsets.symmetric(
+                                horizontal:
+                                    MediaQuery.of(context).size.width * 0.1,
+                                vertical:
+                                    MediaQuery.of(context).size.height * 0.02,
+                              ),
+                            ),
+                            backgroundColor:
+                                MaterialStateProperty.all<Color>(Colors.indigo),
+                          ),
                         ),
                       ),
                     ),
                     Offstage(
                       offstage: !offstageIdx,
                       child: Text(
-                        "<감사한 일을 작성해보세요>",
+                        "<감사한 일 작성>",
                         style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          fontFamily: 'NotoSans',
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                     Expanded(
                       child: Container(
-                        margin: EdgeInsets.only(top: 15, left: 20, right: 20, bottom: 20),
+                        margin: EdgeInsets.only(
+                          left: MediaQuery.of(context).size.width * 0.05,
+                          right: MediaQuery.of(context).size.width * 0.05,
+                          top: MediaQuery.of(context).size.height * 0.02,
+                          bottom: MediaQuery.of(context).size.width * 0.15,
+                        ),
+                        padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height * 0.01,
+                        ),
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: Colors.indigo,
@@ -274,24 +380,40 @@ class _LastTestScreenState extends State<LastTestScreen> {
                           itemBuilder: (context, index) {
                             final DocumentSnapshot documentSnapshot =
                                 streamSnapshot.data!.docs[index];
+                            var titleOther = '타인';
                             return Card(
-                              margin: EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8,),
+                              margin: EdgeInsets.symmetric(
+                                horizontal:
+                                    MediaQuery.of(context).size.width * 0.02,
+                                vertical:
+                                    MediaQuery.of(context).size.height * 0.03,
+                              ),
                               child: ListTile(
-                                title: Text(
-                                  documentSnapshot['title'],
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                                title: Padding(
+                                  padding: EdgeInsets.only(
+                                    bottom: MediaQuery.of(context).size.height *
+                                        0.01,
+                                  ),
+                                  child: Text(
+                                    documentSnapshot['title'],
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontFamily: 'NotoSans',
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
                                 subtitle: Text(
                                   documentSnapshot['description'],
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize: 14,
+                                    fontFamily: 'NotoSans',
+                                    fontWeight: FontWeight.w400,
                                   ),
+                                  maxLines: 1,
                                 ),
                                 trailing: SizedBox(
-                                  width: 100,
+                                  width: 50,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
@@ -310,36 +432,6 @@ class _LastTestScreenState extends State<LastTestScreen> {
                         ),
                       ),
                     ),
-                    /*
-                    Offstage(
-                      offstage: !offstageIdx,
-                      child: Container(
-                        margin: EdgeInsets.only(bottom: 20),
-                        color: Colors.green,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                            '완료',
-                            style: TextStyle(
-                              //fontWeight: FontWeight.bold,
-                              fontSize: 25,
-                            ),
-                          ),
-                          style: ButtonStyle(
-                            padding: MaterialStateProperty.all<EdgeInsets>(
-                              EdgeInsets.symmetric(
-                                vertical: 12,
-                                horizontal: 20,
-                              ),
-                            ),
-                            backgroundColor:
-                                MaterialStateProperty.all<Color>(Colors.indigo),
-                          ),
-                        ),
-                      ),
-                    ), */
                   ],
                 );
               }

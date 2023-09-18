@@ -17,13 +17,20 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        margin: EdgeInsets.symmetric(
+          vertical: MediaQuery.of(context).size.height * 0.03,
+          horizontal: MediaQuery.of(context).size.width * 0.1,
+        ),
         child: Center(
           child: Column(
             children: [
               Expanded(
                 child: Container(
-                  margin: EdgeInsets.symmetric(vertical: 30, horizontal: 30),
+                  width: MediaQuery.of(context).size.width * 0.4,
+                  margin: EdgeInsets.symmetric(
+                      //vertical: 30,
+                      //horizontal: 30,
+                      ),
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage(
@@ -34,50 +41,61 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10.0,
-                  vertical: 15.0,
+                padding: EdgeInsets.symmetric(
+                  //horizontal: 10.0,
+                  //vertical: 15.0,
+                  vertical: MediaQuery.of(context).size.height * 0.03,
                 ),
-                child: Text(
-                  "Create and Manage Your Thank-you Notes",
-                  style: TextStyle(
-                    fontSize: 34.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Column(
+                  children: [
+                    Text(
+                      "Create and Manage",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.w800,
+                        fontFamily: 'NotoSans',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      "Your Thank-you Notes",
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontFamily: 'NotoSans',
+                        fontWeight: FontWeight.w800,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10.0,
-                  vertical: 10.0,
-                ),
-                child: ElevatedButton(
-                  onPressed: () {
-                    signInWithGoogle(context);
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Google Login',
-                        style: TextStyle(
-                          fontSize: 25.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                  style: ButtonStyle(
-                    padding: MaterialStateProperty.all(
-                      EdgeInsets.symmetric(
-                        vertical: 15.0,
+              ElevatedButton(
+                onPressed: () {
+                  signInWithGoogle(context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Google Login',
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        fontFamily: 'NotoSans',
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    backgroundColor: MaterialStateProperty.all(Colors.indigo),
+                  ],
+                ),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.07),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
                   ),
+                  backgroundColor: Colors.indigo,
                 ),
               ),
               SizedBox(
-                height: 15.0,
+                height: MediaQuery.of(context).size.height * 0.1,
               )
             ],
           ),
