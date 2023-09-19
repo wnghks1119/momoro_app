@@ -1,0 +1,32 @@
+flutter_native_splash:
+  color: "#ffffff"
+
+  # 앱 아이콘 이미지
+  image: assets/images/momoro_background_logo.png
+
+  # 뒷 배경의 이미지 (color가 있을 경우 color가 적용됨)
+  #background_image: assets/images/momoro_background_logo.png
+  #background_color: "#ffffff"
+
+
+  android_12:
+    image: assets/images/momoro_background_logo.png
+
+  # Splash screen background color.
+    color: "#ffffff"
+
+
+  android: true
+  ios: true
+
+  color_android: "#ffffff"
+  color_ios: "#ffffff"
+
+
+  image_android: assets/images/momoro_background_logo.png
+  image_ios: assets/images/momoro_background_logo.png
+
+  #background_image_android: assets/images/momoro_background_logo.png
+  #background_image_ios: assets/images/momoro_background_logo.png
+
+  fullscreen: true

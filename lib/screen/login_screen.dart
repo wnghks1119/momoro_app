@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               Expanded(
                 child: Container(
-                  width: MediaQuery.of(context).size.width * 0.4,
+                  width: MediaQuery.of(context).size.width * 0.6,
                   margin: EdgeInsets.symmetric(
                       //vertical: 30,
                       //horizontal: 30,
@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage(
-                        "assets/images/google.png",
+                        "assets/images/momoro_logo_text.png",
                       ),
                     ),
                   ),
@@ -84,10 +84,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.02,
+                    ),
+                   Image.asset(
+                     "assets/images/google.png",
+                     height: MediaQuery.of(context).size.width * 0.08,
+                   ),
                   ],
                 ),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.07),
+                  minimumSize: Size.fromHeight(
+                      MediaQuery.of(context).size.height * 0.07),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
                   ),
